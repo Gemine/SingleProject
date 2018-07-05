@@ -58,18 +58,31 @@ void setup() {
  
 }
  
-void callback(char* topic, byte* payload, unsigned int length) {
- 
-  Serial.print("Message arrived in topic: ");
-  Serial.println(topic);
- 
-  Serial.print("Message:");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
+void callback(char* topic, byte* payload, unsigned int length) {  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("Connecting to WiFi..");
   }
+  Serial.println("Connected to the WiFi network");
  
-  Serial.println();
-  Serial.println("-----------------------");
+  client.setServer(mqttServer, mqttPort);
+  client.setCallback(callback);
+ 
+  while (!client.connected()) {
+    Serial.println("Connecting to MQTT...");
+ 
+    if (client.connect("ESP8266Client", mqttUser, mqttPassword )) {
+ 
+      Serial.println("connected");  
+ 
+    } else {
+ 
+      Serial.print("failed with state ");
+      Serial.print(client.state());
+      delay(2000);
+ 
+    }
+  }
  
 }
  
@@ -82,6 +95,5 @@ void loop() {
   client.publish("esp/test", temp2);
   //chờ 1 s rồi đọc để bạn kiệp thấy sự thay đổi
   delay(1000);
-  //client.loop();
+  client.loop();
 }
-
